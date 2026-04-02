@@ -55,17 +55,20 @@ jobs:
     steps:
       - name: Checkout (for compose files)
         uses: actions/checkout@v4
-      - name: List files for SCP
+
+      - name: Verify files exist
         run: |
+          echo "Checking files for deployment..."
           ls -la docker-compose.prod.yml
           ls -la deploy/Caddyfile
+
       - name: Copy deploy bundle to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          port: ${{ secrets.VPS_SSH_PORT || '22' }}
           source: |
             docker-compose.prod.yml
             deploy/Caddyfile
@@ -78,7 +81,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          port: ${{ secrets.VPS_SSH_PORT || '22' }}
           script: |
             set -euo pipefail
             cd "${{ secrets.VPS_APP_DIR }}"
@@ -87,11 +90,10 @@ jobs:
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
             # Write env for Caddy
-            cat > .env <<'EOF'
-            DOMAIN=${{ secrets.DOMAIN }}
-            ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-            EOF
+            cat > .env <<EOF
+DOMAIN=${{ secrets.DOMAIN }}
+ACME_EMAIL=${{ secrets.ACME_EMAIL }}
+EOF
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
-
