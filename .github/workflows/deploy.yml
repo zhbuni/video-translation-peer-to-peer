@@ -55,7 +55,10 @@ jobs:
     steps:
       - name: Checkout (for compose files)
         uses: actions/checkout@v4
-
+      - name: List files for SCP
+        run: |
+          ls -la docker-compose.prod.yml
+          ls -la deploy/Caddyfile
       - name: Copy deploy bundle to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -70,8 +73,6 @@ jobs:
           strip_components: 0
 
       - name: Deploy via SSH (pull + up)
-      - name: List files
-        run: ls -la ${{ github.workspace }}/{{ secrets.VPS_APP_DIR }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
