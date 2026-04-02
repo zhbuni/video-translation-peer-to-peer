@@ -90,10 +90,7 @@ jobs:
             echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u "${{ secrets.GHCR_USERNAME }}" --password-stdin
 
             # Write env for Caddy
-            cat > .env <<EOF
-DOMAIN=${{ secrets.DOMAIN }}
-ACME_EMAIL=${{ secrets.ACME_EMAIL }}
-EOF
+            cat > .env <<EOF DOMAIN=${{ secrets.DOMAIN }} ACME_EMAIL=${{ secrets.ACME_EMAIL }} EOF
 
             docker compose -f docker-compose.prod.yml pull
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
