@@ -63,7 +63,7 @@ jobs:
           ls -la deploy/Caddyfile
 
       - name: Copy deploy bundle to VPS
-        uses: appleboy/scp-action@v0.1.10
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
