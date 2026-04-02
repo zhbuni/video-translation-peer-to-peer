@@ -70,6 +70,8 @@ jobs:
           strip_components: 0
 
       - name: Deploy via SSH (pull + up)
+      - name: List files
+        run: ls -la ${{ github.workspace }}/{{ secrets.VPS_APP_DIR }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
