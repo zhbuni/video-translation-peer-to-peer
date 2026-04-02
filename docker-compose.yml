@@ -1,0 +1,36 @@
+services:
+  signaling:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8080
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - p2pnet
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        - VITE_SIGNALING_URL=ws://localhost:8080/ws
+        - VITE_STUN_URLS=stun:stun.l.google.com:19302
+        - VITE_TURN_URL=
+        - VITE_TURN_USER=
+        - VITE_TURN_PASS=
+    ports:
+      - "8081:80"
+    restart: unless-stopped
+    networks:
+      - p2pnet
+
+networks:
+  p2pnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
+

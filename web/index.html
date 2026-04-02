@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>p2p-webrtc</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --panel: rgba(255, 255, 255, 0.06);
+        --muted: rgba(255, 255, 255, 0.7);
+        --border: rgba(255, 255, 255, 0.12);
+        --accent: #7c5cff;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+          Arial, sans-serif;
+        background: radial-gradient(1200px 800px at 20% 0%, #1a2150, var(--bg));
+        color: white;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+        letter-spacing: 0.2px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 12px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        backdrop-filter: blur(8px);
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin: 10px 0 6px;
+      }
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+        color: white;
+        outline: none;
+      }
+      select {
+        box-sizing: border-box;
+        border-radius: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+        color: white;
+        outline: none;
+      }
+      input:focus {
+        border-color: rgba(124, 92, 255, 0.7);
+        box-shadow: 0 0 0 3px rgba(124, 92, 255, 0.15);
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      button {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: background 120ms ease;
+      }
+      button.primary {
+        background: rgba(124, 92, 255, 0.25);
+        border-color: rgba(124, 92, 255, 0.7);
+      }
+      button:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .videos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 10px;
+      }
+      .tile {
+        position: relative;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.25);
+        aspect-ratio: 16 / 9;
+      }
+      .tile video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .badge {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        font-size: 12px;
+        padding: 6px 8px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.35;
+      }
+      @media (max-width: 920px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>p2p-webrtc mesh</h1>
+        <div class="muted">WebRTC P2P, signaling via Go WebSocket</div>
+      </header>
+
+      <div class="grid">
+        <section class="panel">
+          <div class="muted">
+            Для работы WebRTC screen share нужен HTTPS или localhost.
+          </div>
+
+          <label for="signalingUrl">Signaling WS URL</label>
+          <input id="signalingUrl" placeholder="ws://localhost:8080/ws" />
+
+          <label for="roomId">Room ID</label>
+          <input id="roomId" placeholder="demo" />
+
+          <label for="peerId">Peer ID</label>
+          <input id="peerId" placeholder="alice" />
+
+          <label for="stunUrls">STUN URLs (через запятую)</label>
+          <input
+            id="stunUrls"
+            placeholder="stun:stun.l.google.com:19302"
+          />
+
+          <label for="turnUrl">TURN URL (опционально)</label>
+          <input id="turnUrl" placeholder="turn:turn.example.com:3478?transport=udp" />
+
+          <label for="turnUser">TURN username (опционально)</label>
+          <input id="turnUser" placeholder="user" />
+
+          <label for="turnPass">TURN password (опционально)</label>
+          <input id="turnPass" placeholder="pass" />
+
+          <label>Screen share quality</label>
+          <div class="row" style="margin-top: 0">
+            <select id="qualityRes" style="flex: 1; min-width: 150px">
+              <option value="720">720p</option>
+              <option value="1080">1080p</option>
+            </select>
+            <select id="qualityFps" style="flex: 1; min-width: 150px">
+              <option value="15">15fps</option>
+              <option value="30">30fps</option>
+            </select>
+          </div>
+
+          <label for="maxKbps">Max video bitrate (kbps)</label>
+          <input id="maxKbps" placeholder="2500" />
+
+          <div class="row">
+            <button id="joinBtn" class="primary">Join</button>
+            <button id="startBtn" disabled>Start screen+mic</button>
+            <button id="leaveBtn" disabled>Leave</button>
+          </div>
+
+          <label>Status</label>
+          <pre id="status"></pre>
+        </section>
+
+        <section class="panel">
+          <div class="videos" id="videos"></div>
+          <div style="margin-top: 10px">
+            <div class="muted" style="margin-bottom: 6px">Stats (обновление ~1s)</div>
+            <pre id="stats"></pre>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+

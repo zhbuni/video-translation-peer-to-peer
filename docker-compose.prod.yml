@@ -1,0 +1,37 @@
+services:
+  signaling:
+    image: ghcr.io/zhbuni/video-translation-peer-to-peer-signaling:latest
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+    expose:
+      - "8080"
+
+  web:
+    image: ghcr.io/zhbuni/video-translation-peer-to-peer-web:latest
+    restart: unless-stopped
+    expose:
+      - "80"
+
+  caddy:
+    image: caddy:2.9-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      # Set these on the VPS in a .env file next to docker-compose.prod.yml
+      - DOMAIN=${DOMAIN}
+      - ACME_EMAIL=${ACME_EMAIL}
+    depends_on:
+      - web
+      - signaling
+
+volumes:
+  caddy_data:
+  caddy_config:
+

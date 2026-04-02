@@ -1,0 +1,11 @@
+{$DOMAIN} {
+	email {$ACME_EMAIL}
+
+	encode zstd gzip
+
+	@ws path /ws
+	reverse_proxy @ws signaling:8080
+
+	reverse_proxy web:80
+}
+

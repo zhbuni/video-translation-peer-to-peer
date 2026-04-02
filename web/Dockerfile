@@ -1,0 +1,34 @@
+FROM node:22-alpine AS build
+
+WORKDIR /app
+COPY package.json ./
+
+RUN npm install
+
+COPY index.html vite.config.ts tsconfig.json ./
+COPY src/ src/
+
+ARG VITE_SIGNALING_URL
+ENV VITE_SIGNALING_URL=$VITE_SIGNALING_URL
+
+ARG VITE_STUN_URLS
+ENV VITE_STUN_URLS=$VITE_STUN_URLS
+
+ARG VITE_TURN_URL
+ENV VITE_TURN_URL=$VITE_TURN_URL
+
+ARG VITE_TURN_USER
+ENV VITE_TURN_USER=$VITE_TURN_USER
+
+ARG VITE_TURN_PASS
+ENV VITE_TURN_PASS=$VITE_TURN_PASS
+
+RUN npm run build
+
+
+FROM nginx:1.27-alpine
+
+COPY --from=build /app/dist/ /usr/share/nginx/html/
+
+EXPOSE 80
+
