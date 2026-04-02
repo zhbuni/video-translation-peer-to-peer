@@ -63,15 +63,13 @@ jobs:
           ls -la deploy/Caddyfile
 
       - name: Copy deploy bundle to VPS
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v0.1.10
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_SSH_PORT || '22' }}
-          source: |
-            docker-compose.prod.yml
-            deploy/Caddyfile
+          source: "docker-compose.prod.yml deploy/Caddyfile"
           target: ${{ secrets.VPS_APP_DIR }}
           strip_components: 0
 
@@ -84,6 +82,7 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT || '22' }}
           script: |
             set -euo pipefail
+            mkdir -p "${{ secrets.VPS_APP_DIR }}"
             cd "${{ secrets.VPS_APP_DIR }}"
 
             # GHCR login on the server
